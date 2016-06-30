@@ -4,3 +4,4 @@
 
 * Stream: GET ALL, POST
 * User: GET ALL
+* CustomProperty: GET ALL, PUT
