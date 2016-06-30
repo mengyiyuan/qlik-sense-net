@@ -8,3 +8,13 @@ C:\Users\yuanme\OneDrive - Hewlett Packard Enterprise\HPE\Automation\Visual Stud
 C:\Users\yuanme\OneDrive - Hewlett Packard Enterprise\HPE\Automation\Visual Studio Codes\Projects\sense_test\sense_test\bin\Debug\Newtonsoft.Json.xml
 C:\Users\yuanme\OneDrive - Hewlett Packard Enterprise\HPE\Automation\Visual Studio Codes\Projects\sense_test\sense_test\bin\Debug\RestSharp.dll
 C:\Users\yuanme\OneDrive - Hewlett Packard Enterprise\HPE\Automation\Visual Studio Codes\Projects\sense_test\sense_test\bin\Debug\RestSharp.xml
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\bin\Debug\sense_test.exe.config
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\obj\Debug\sense_test.exe
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\obj\Debug\sense_test.pdb
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\bin\Debug\sense_test.exe
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\bin\Debug\sense_test.pdb
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\bin\Debug\Newtonsoft.Json.dll
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\bin\Debug\RestSharp.dll
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\bin\Debug\Newtonsoft.Json.xml
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\bin\Debug\RestSharp.xml
+C:\Users\yuanme\Documents\GitHub\sense_test\sense_test\obj\Debug\sense_test.csprojResolveAssemblyReference.cache

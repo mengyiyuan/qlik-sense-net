@@ -19,10 +19,10 @@ namespace sense_test
         static void Main(string[] args)
         {
             // Test get all sense users
-            foreach (SenseUser user in GetAllSenseUsers())
-            {
-                Console.WriteLine(string.Format("User ID: {0}\tUser Directory: {1}\tName: {2}\n", user.UserID, user.UserDirectory, user.Name));
-            }
+            //foreach (SenseUser user in GetAllSenseUsers())
+            //{
+            //    Console.WriteLine(string.Format("User ID: {0}\tUser Directory: {1}\tName: {2}\n", user.UserID, user.UserDirectory, user.Name));
+            //}
 
             // Test create new stream
             //SenseStream testStream = CreateNewStream("API test3");
@@ -30,6 +30,12 @@ namespace sense_test
 
             // Test get all streams
             //GetAllStreams();
+
+            // Test get all custom properties
+            //GetAllCustomProperty();
+
+            // Test update choice values in custom property
+            UpdateCustomProperty("API test", "StreamCategory");
 
             Console.ReadKey();
         }
@@ -41,23 +47,7 @@ namespace sense_test
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length).
                 Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-        
-        private static List<SenseUser> GetAllSenseUsers()
-        {
-            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            // Execute the request
-            var client = new RestClient(baseUrl);
-            client.ClientCertificates = new X509CertificateCollection();
-            client.ClientCertificates.Add(RetrieveQsCert());
-
-            IRestResponse response = client.Execute(GenerateQsRequest("/qrs/user", "&filter=userDirectory ne 'INTERNAL'", Method.GET));
-            var content = response.Content;
-            List<SenseUser> allUsers = JsonConvert.DeserializeObject<List<SenseUser>>(content.ToString());
-
-            return allUsers;
-        }
+        }        
 
         private static X509Certificate2 RetrieveQsCert()
         {
@@ -70,7 +60,7 @@ namespace sense_test
             return certificate_;
         }
 
-        private static RestRequest GenerateQsRequest(string apiPath, string optionalQueryString, Method method)
+        private static RestRequest GenerateQsRequest(string apiPath, string optionalQueryString, object body, Method method)
         {
             // Generate Xrf key as required by calling Qlik Sense APIs
             string requestXrfKey = GetXrfKey(16);
@@ -83,8 +73,34 @@ namespace sense_test
             request.AddHeader("Content-Type", "application/json");
             request.AddHeader("Accept", "application/json");
             request.AddHeader("X-Qlik-User", @"UserDirectory=internal;UserId=sa_repository");
+
+            // If method is POST or PUT, we need a body
+            if (method == Method.POST || method == Method.PUT)
+            {
+                request.RequestFormat = DataFormat.Json;
+                request.AddBody(body);
+            }
             
             return request;
+        }
+
+        private static string ExecuteQsRequest(RestRequest request)
+        {
+            var client = new RestClient(baseUrl);
+            client.ClientCertificates = new X509CertificateCollection();
+            client.ClientCertificates.Add(RetrieveQsCert());
+            IRestResponse response = client.Execute(request);
+            return response.Content.ToString();
+        }
+
+        private static List<SenseUser> GetAllSenseUsers()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            var request = GenerateQsRequest("/qrs/user", "&filter=userDirectory ne 'INTERNAL'", null, Method.GET);
+            List<SenseUser> allUsers = JsonConvert.DeserializeObject<List<SenseUser>>(ExecuteQsRequest(request));            
+
+            return allUsers;
         }
 
         private static List<SenseStream> GetAllStreams()
@@ -96,7 +112,7 @@ namespace sense_test
             client.ClientCertificates = new X509CertificateCollection();
             client.ClientCertificates.Add(RetrieveQsCert());
 
-            IRestResponse response = client.Execute(GenerateQsRequest("/qrs/stream", "", Method.GET));
+            IRestResponse response = client.Execute(GenerateQsRequest("/qrs/stream", "", null, Method.GET));
             var content = response.Content;
 
             List<SenseStream> streamList = JsonConvert.DeserializeObject<List<SenseStream>>(content.ToString());
@@ -107,37 +123,67 @@ namespace sense_test
         private static SenseStream CreateNewStream(string streamName)
         {            
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-            // Generate Xrf key as required by calling Qlik Sense APIs
-            string requestXrfKey = GetXrfKey(16);
-            var request = new RestRequest("/qrs/stream?xrfkey=" + requestXrfKey, Method.POST);
-
-            // Add headers
-            request.AddHeader("X-Qlik-Xrfkey", requestXrfKey);
-            request.AddHeader("Content-Type", "application/json");
-            request.AddHeader("Accept", "application/json");
-            request.AddHeader("X-Qlik-User", @"UserDirectory=internal;UserId=sa_repository");
-
+                       
             // Create POST body
             SenseStream newStream = new SenseStream();
             newStream.id = "00000000-0000-0000-0000-000000000000";
             newStream.name = streamName;
-            request.RequestFormat = DataFormat.Json;
-            request.AddBody(newStream);
+            var request = GenerateQsRequest("/qrs/stream", "", newStream, Method.POST);
 
-            // Execute the request
-            var client = new RestClient(baseUrl + ":4242");
-            client.ClientCertificates = new X509CertificateCollection();
-            client.ClientCertificates.Add(RetrieveQsCert());
-            IRestResponse response = client.Execute(request);
-            var content = response.Content;
-
-            newStream = JsonConvert.DeserializeObject<SenseStream>(content.ToString());
+            // Execute the request and deserialize results
+            newStream = JsonConvert.DeserializeObject<SenseStream>(ExecuteQsRequest(request));
 
             return newStream;
+        }        
+
+        private static List<SenseCustomProperty> GetAllCustomProperty()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            // Execute the request
+            var client = new RestClient(baseUrl);
+            client.ClientCertificates = new X509CertificateCollection();
+            client.ClientCertificates.Add(RetrieveQsCert());
+
+            IRestResponse response = client.Execute(GenerateQsRequest("/qrs/custompropertydefinition/full", "", null, Method.GET));
+            var content = response.Content;
+
+            List<SenseCustomProperty> customPropertyList = JsonConvert.DeserializeObject<List<SenseCustomProperty>>(content.ToString());
+
+            return customPropertyList;
         }
 
-        
-        
+        //private static string GetResourceIdByName(string resourceName)
+        //{
+
+        //}
+
+        private static SenseCustomProperty UpdateCustomProperty(string newChoiceValue, string propertyName)
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            // Create PUT body
+            SenseCustomProperty updatedProperty = new SenseCustomProperty();
+            
+            List<SenseCustomProperty> customPropertyList = GetAllCustomProperty();
+            
+            foreach (SenseCustomProperty property in customPropertyList)
+            {
+                if (property.name == propertyName)
+                {
+                    updatedProperty = property;
+                    break;
+                }
+            }
+
+            updatedProperty.choiceValues.Add(newChoiceValue);
+            //string body = JsonConvert.SerializeObject(updatedProperty);
+
+            var request = GenerateQsRequest("/qrs/custompropertydefinition/" + updatedProperty.id, "", updatedProperty, Method.PUT);
+
+            updatedProperty = JsonConvert.DeserializeObject<SenseCustomProperty>(ExecuteQsRequest(request));
+            return updatedProperty;
+        }
+
     }
 }
