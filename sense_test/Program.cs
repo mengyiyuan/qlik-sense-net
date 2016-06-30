@@ -35,7 +35,7 @@ namespace sense_test
             //GetAllCustomProperty();
 
             // Test update choice values in custom property
-            UpdateCustomProperty("API test", "StreamCategory");
+            //UpdateCustomProperty("API test", "StreamCategory");
 
             Console.ReadKey();
         }
@@ -112,7 +112,7 @@ namespace sense_test
             client.ClientCertificates = new X509CertificateCollection();
             client.ClientCertificates.Add(RetrieveQsCert());
 
-            IRestResponse response = client.Execute(GenerateQsRequest("/qrs/stream", "", null, Method.GET));
+            IRestResponse response = client.Execute(GenerateQsRequest("/qrs/stream/full", "", null, Method.GET));
             var content = response.Content;
 
             List<SenseStream> streamList = JsonConvert.DeserializeObject<List<SenseStream>>(content.ToString());
@@ -136,7 +136,7 @@ namespace sense_test
             return newStream;
         }        
 
-        private static List<SenseCustomProperty> GetAllCustomProperty()
+        private static List<CustomPropertyDefinition> GetAllCustomProperty()
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
@@ -148,21 +148,21 @@ namespace sense_test
             IRestResponse response = client.Execute(GenerateQsRequest("/qrs/custompropertydefinition/full", "", null, Method.GET));
             var content = response.Content;
 
-            List<SenseCustomProperty> customPropertyList = JsonConvert.DeserializeObject<List<SenseCustomProperty>>(content.ToString());
+            List<CustomPropertyDefinition> customPropertyList = JsonConvert.DeserializeObject<List<CustomPropertyDefinition>>(content.ToString());
 
             return customPropertyList;
         }
 
-        private static SenseCustomProperty UpdateCustomProperty(string newChoiceValue, string propertyName)
+        private static CustomPropertyDefinition UpdateCustomProperty(string newChoiceValue, string propertyName)
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
             // Create PUT body
-            SenseCustomProperty updatedProperty = new SenseCustomProperty();
+            CustomPropertyDefinition updatedProperty = new CustomPropertyDefinition();
             
-            List<SenseCustomProperty> customPropertyList = GetAllCustomProperty();
+            List<CustomPropertyDefinition> customPropertyList = GetAllCustomProperty();
             
-            foreach (SenseCustomProperty property in customPropertyList)
+            foreach (CustomPropertyDefinition property in customPropertyList)
             {
                 if (property.name == propertyName)
                 {
@@ -176,7 +176,7 @@ namespace sense_test
 
             var request = GenerateQsRequest("/qrs/custompropertydefinition/" + updatedProperty.id, "", updatedProperty, Method.PUT);
 
-            updatedProperty = JsonConvert.DeserializeObject<SenseCustomProperty>(ExecuteQsRequest(request));
+            updatedProperty = JsonConvert.DeserializeObject<CustomPropertyDefinition>(ExecuteQsRequest(request));
             return updatedProperty;
         }
 

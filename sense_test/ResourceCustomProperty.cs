@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace sense_test
 {
-    class SenseStream
+    class ResourceCustomProperty
     {
-        public string id { get; set; }        
-        public string name { get; set; }
+        public string id { get; set; }
         public DateTime modifiedDate { get; set; }
-        public IList<ResourceCustomProperty> customProperties { get; set; }
+        public string value { get; set; }
+        public CustomPropertyDefinition definition { get; set; }
     }
 }

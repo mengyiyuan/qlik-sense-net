@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace sense_test
 {
-    class SenseCustomProperty
+    class CustomPropertyDefinition
     {
         public string id { get; set; }
         public DateTime modifiedDate { get; set; }
