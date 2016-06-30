@@ -136,7 +136,7 @@ namespace sense_test
             return newStream;
         }        
 
-        private static List<CustomPropertyDefinition> GetAllCustomProperty()
+        private static List<CustomPropertyDefinition> GetAllCustomPropertyDefinition()
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
@@ -153,26 +153,29 @@ namespace sense_test
             return customPropertyList;
         }
 
-        private static CustomPropertyDefinition UpdateCustomProperty(string newChoiceValue, string propertyName)
+        private static CustomPropertyDefinition GetCustomPropertyByName(string propertyName)
+        {
+            List<CustomPropertyDefinition> customPropertyDefinitionList = GetAllCustomPropertyDefinition();
+
+            foreach (CustomPropertyDefinition definition in customPropertyDefinitionList)
+            {
+                if (definition.name == propertyName)
+                {
+                    return definition;
+                }
+            }
+
+            return null;
+        }
+
+        private static CustomPropertyDefinition UpdateCustomPropertyDefinition(string newChoiceValue, string propertyName)
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
             // Create PUT body
-            CustomPropertyDefinition updatedProperty = new CustomPropertyDefinition();
-            
-            List<CustomPropertyDefinition> customPropertyList = GetAllCustomProperty();
-            
-            foreach (CustomPropertyDefinition property in customPropertyList)
-            {
-                if (property.name == propertyName)
-                {
-                    updatedProperty = property;
-                    break;
-                }
-            }
-
+            CustomPropertyDefinition updatedProperty = GetCustomPropertyByName(propertyName);
+                        
             updatedProperty.choiceValues.Add(newChoiceValue);
-            //string body = JsonConvert.SerializeObject(updatedProperty);
 
             var request = GenerateQsRequest("/qrs/custompropertydefinition/" + updatedProperty.id, "", updatedProperty, Method.PUT);
 
@@ -180,5 +183,6 @@ namespace sense_test
             return updatedProperty;
         }
 
+        
     }
 }
