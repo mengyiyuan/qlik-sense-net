@@ -153,11 +153,6 @@ namespace sense_test
             return customPropertyList;
         }
 
-        //private static string GetResourceIdByName(string resourceName)
-        //{
-
-        //}
-
         private static SenseCustomProperty UpdateCustomProperty(string newChoiceValue, string propertyName)
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
