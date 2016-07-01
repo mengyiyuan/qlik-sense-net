@@ -8,8 +8,13 @@ namespace sense_test
 {
     class SenseUser
     {
-        public string UserID { get; set; }
-        public string UserDirectory { get; set; }
-        public string Name { get; set; }
+        public SenseUser()
+        {
+            id = "00000000-0000-0000-0000-000000000000";
+        }
+        public string id { get; set; }
+        public string userId { get; set; }
+        public string userDirectory { get; set; }
+        public string name { get; set; }
     }
 }

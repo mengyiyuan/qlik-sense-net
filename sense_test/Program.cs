@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Nancy;
 
 namespace sense_test
 {
@@ -36,6 +37,8 @@ namespace sense_test
 
             // Test update choice values in custom property
             //UpdateCustomProperty("API test", "StreamCategory");
+
+            OnboardNewUser("junwang", "ASIAPACIFIC", "jun.wang9@hpe.com");
 
             Console.ReadKey();
         }
@@ -103,6 +106,26 @@ namespace sense_test
             return allUsers;
         }
 
+        private static SenseUser CreateNewSenseUser(SenseUser newUser)
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            var request = GenerateQsRequest("/qrs/user", "", newUser, Method.POST);
+            newUser = JsonConvert.DeserializeObject<SenseUser>(ExecuteQsRequest(request));
+
+            return newUser;
+        }
+
+        private static SenseUser OnboardNewUser(string userId, string userDirectory, string name)
+        {
+            SenseUser newUser = new SenseUser();
+            newUser.userId = userId;
+            newUser.userDirectory = userDirectory;
+            newUser.name = name;
+            SenseUser addedUser = CreateNewSenseUser(newUser);
+            return addedUser;
+        }
+
         private static List<SenseStream> GetAllStreams()
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
@@ -125,8 +148,7 @@ namespace sense_test
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
                        
             // Create POST body
-            SenseStream newStream = new SenseStream();
-            newStream.id = "00000000-0000-0000-0000-000000000000";
+            SenseStream newStream = new SenseStream();            
             newStream.name = streamName;
             var request = GenerateQsRequest("/qrs/stream", "", newStream, Method.POST);
 
