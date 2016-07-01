@@ -38,7 +38,9 @@ namespace sense_test
             // Test update choice values in custom property
             //UpdateCustomProperty("API test", "StreamCategory");
 
-            OnboardNewUser("junwang", "ASIAPACIFIC", "jun.wang9@hpe.com");
+            //OnboardNewUser("junwang", "ASIAPACIFIC", "jun.wang9@hpe.com");
+
+            //StartTask("ASIAPACIFIC_usersynctask");
 
             Console.ReadKey();
         }
@@ -118,11 +120,16 @@ namespace sense_test
 
         private static SenseUser OnboardNewUser(string userId, string userDirectory, string name)
         {
+            // Add user into user list
             SenseUser newUser = new SenseUser();
             newUser.userId = userId;
             newUser.userDirectory = userDirectory;
             newUser.name = name;
             SenseUser addedUser = CreateNewSenseUser(newUser);
+
+            // Reload the directory-specific user sync task
+            string syncTaskName = userDirectory + "_usersynctask";
+            StartTask(syncTaskName);
             return addedUser;
         }
 
@@ -130,15 +137,8 @@ namespace sense_test
         {
             ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
 
-            // Execute the request
-            var client = new RestClient(baseUrl);
-            client.ClientCertificates = new X509CertificateCollection();
-            client.ClientCertificates.Add(RetrieveQsCert());
-
-            IRestResponse response = client.Execute(GenerateQsRequest("/qrs/stream/full", "", null, Method.GET));
-            var content = response.Content;
-
-            List<SenseStream> streamList = JsonConvert.DeserializeObject<List<SenseStream>>(content.ToString());
+            var request = GenerateQsRequest("/qrs/stream/full", "", null, Method.GET);            
+            List<SenseStream> streamList = JsonConvert.DeserializeObject<List<SenseStream>>(ExecuteQsRequest(request));
 
             return streamList;
         }
@@ -205,6 +205,35 @@ namespace sense_test
             return updatedProperty;
         }
 
-        
+        private static List<SenseTask> GetAllTasks()
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            var request = GenerateQsRequest("/qrs/task", "", null, Method.GET);
+            List<SenseTask> allTasks = JsonConvert.DeserializeObject<List<SenseTask>>(ExecuteQsRequest(request));
+
+            return allTasks;
+        }
+
+        private static string StartTask (string name)
+        {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            List<SenseTask> allTasks = GetAllTasks();
+            string id = string.Empty;
+
+            foreach (SenseTask task in allTasks)
+            {
+                if (string.Equals(task.name, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    id = task.id;
+                }
+            }
+
+            var request = GenerateQsRequest("/qrs/task/" + id + "/start/synchronous", "" , null, Method.POST);
+            string sessoinId = ExecuteQsRequest(request);
+
+            return sessoinId;
+        }
     }
 }

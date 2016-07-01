@@ -60,6 +60,7 @@
     <Compile Include="CustomPropertyDefinition.cs" />
     <Compile Include="ResourceCustomProperty.cs" />
     <Compile Include="SenseStream.cs" />
+    <Compile Include="SenseTask.cs" />
     <Compile Include="SenseUser.cs" />
   </ItemGroup>
   <ItemGroup>
